@@ -81,8 +81,10 @@ function drawAxes(g, x, yMonths) {
     .call(d3.axisLeft(yMonths));
 }
 
-// draws the cells with their colors and sizing
-function drawCells(g, grid, x, y, color, field) {
+// draws the cells with their colors and sizing and also adds hover tooltip
+function drawCells(g, grid, x, y, color, field, getField) {
+  const tooltip = d3.select("#tooltip");
+
   g.append("g")
     .selectAll("rect")
     .data(grid)
@@ -92,7 +94,20 @@ function drawCells(g, grid, x, y, color, field) {
     .attr("y", d => y(d.month) + fillOffset)
     .attr("width", fillSize)
     .attr("height", fillSize)
-    .attr("fill", d => color(d[field]));
+    .attr("fill", d => color(d[field]))
+    
+    .on("mouseover", (event, d) => {
+      tooltip.style("display", "block");
+    })
+    .on("mousemove", (event, d) => {
+      tooltip
+        .html(`Date: ${d.year}-${d.month + 1}; max: ${d.maxTemp.toFixed(1)} min: ${d.minTemp.toFixed(1)}`)
+        .style("left", `${event.pageX + 12}px`)
+        .style("top", `${event.pageY + 12}px`);
+    })
+    .on("mouseout", () => {
+      tooltip.style("display", "none");
+    });
 }
 
 // main function
@@ -108,7 +123,7 @@ function render(data) {
   drawAxes(g, x, yMonths);
 
   let field = "maxTemp";
-  drawCells(g, grid, x, y, buildColorScale(grid, field), field);
+  drawCells(g, grid, x, y, buildColorScale(grid, field), field, () => field);
 
   d3.select("#toggle-btn").on("click", () => {
     field = field === "maxTemp" ? "minTemp" : "maxTemp";
