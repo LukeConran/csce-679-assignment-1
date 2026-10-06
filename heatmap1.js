@@ -1,6 +1,6 @@
 const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; // Months of the year
 const margin = { top: 30, right: 20, bottom: 20, left: 50 };                              // Margins of the graph
-const cellSize = 40;                                                                      // Size of cells, good for changing whole grid size
+const cellSize = 50;                                                                      // Size of cells, good for changing whole grid size
 const fillArea = 0.75;                                                                    // Used for aesthetics assignment wants
 const fillSize = cellSize * Math.sqrt(fillArea);
 const fillOffset = (cellSize - fillSize) / 2;
@@ -23,13 +23,13 @@ function prepareData(data) {
   return data;
 }
 
-// computes mean of max_temperature (and mean of min_temperature) per (year, month)
-function computeMonthlyMeans(data) {
+// computes the overall max of max_temperature (and overall min of min_temperature) per (year, month)
+function computeMonthlyExtremes(data) {
   const grouped = d3.rollup(
     data,
     rows => ({
-      maxTemp: d3.mean(rows, d => d.max_temperature),
-      minTemp: d3.mean(rows, d => d.min_temperature)
+      maxTemp: d3.max(rows, d => d.max_temperature),
+      minTemp: d3.min(rows, d => d.min_temperature)
     }),
     d => d.year,
     d => d.month
@@ -115,7 +115,7 @@ function render(data) {
   prepareData(data);
 
   const years = Array.from(new Set(data.map(d => d.year))).sort((a, b) => a - b);
-  const grid = computeMonthlyMeans(data);
+  const grid = computeMonthlyExtremes(data);
 
   const { x, y, yMonths } = buildScales(years);
   const g = createSvg(years);

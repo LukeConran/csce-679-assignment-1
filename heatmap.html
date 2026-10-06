@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  
+
 <head>
   <meta charset="utf-8">
   <title>Temperature Heatmap</title>
@@ -10,7 +10,7 @@
     text { font-family: sans-serif; font-size: 10px; }
     .axis .domain { stroke: #000; }
     .axis .tick line { stroke: #000; }
-    #tooltip {
+    #tooltip, #tooltip2 {
       position: absolute;
       display: none;
       pointer-events: none;
@@ -26,8 +26,13 @@
 <body>
   <svg id="chart"></svg>
   <div id="tooltip"></div>
-  <script src="heatmap.js"></script>
+  <script src="heatmap1.js"></script>
   <button id="toggle-btn">Show Min Temp</button>
+  <br>
+  <svg id="chart2"></svg>
+  <div id="tooltip2"></div>
+  <script src="heatmap2.js"></script>
+  <button id="toggle-btn2">Show Min Temp</button>
 </body>
 
 </html>
