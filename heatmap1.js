@@ -4,6 +4,7 @@ const cellSize = 50;                                                            
 const fillArea = 0.75;                                                                    // Used for aesthetics assignment wants
 const fillSize = cellSize * Math.sqrt(fillArea);
 const fillOffset = (cellSize - fillSize) / 2;
+const legendWidth = 110;
 
 // parses the dates
 function parseYearMonth(dateString) {
@@ -59,7 +60,7 @@ function buildColorScale(grid, field) {
 
 // creates the correctly sized svg
 function createSvg(years) {
-  const width = margin.left + margin.right + years.length * cellSize;
+  const width = margin.left + margin.right + years.length * cellSize + legendWidth;
   const height = margin.top + margin.bottom + months.length * cellSize;
 
   const svg = d3.select("#chart")
@@ -110,6 +111,27 @@ function drawCells(g, grid, x, y, color, field, getField) {
     });
 }
 
+function drawLegend(g, years) {
+  const legend = g.append("g")
+    .attr("transform", `translate(${years.length * cellSize + 20},0)`);
+
+  legend.append("text")
+    .attr("x", 0).attr("y", 0)
+    .attr("font-weight", "bold")
+    .text("Legend (Celsius)");
+
+  [0, 10, 20, 30, 40].forEach((t, i) => {
+    legend.append("rect")
+      .attr("y", 20 + i * 20)
+      .attr("width", 14).attr("height", 14)
+      .attr("fill", d3.interpolateYlOrRd(t / 40));
+
+    legend.append("text")
+      .attr("x", 20).attr("y", 20 + i * 20 + 11)
+      .text(t);
+  });
+}
+
 // main function
 function render(data) {
   prepareData(data);
@@ -124,6 +146,7 @@ function render(data) {
 
   let field = "maxTemp";
   drawCells(g, grid, x, y, buildColorScale(grid, field), field, () => field);
+  drawLegend(g, years);
 
   d3.select("#toggle-btn").on("click", () => {
     field = field === "maxTemp" ? "minTemp" : "maxTemp";

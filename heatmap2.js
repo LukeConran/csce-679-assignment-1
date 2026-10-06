@@ -9,6 +9,7 @@ const fillWidth2 = cellWidth2 * Math.sqrt(fillArea2);
 const fillHeight2 = cellHeight2 * Math.sqrt(fillArea2);
 const fillOffsetX2 = (cellWidth2 - fillWidth2) / 2;
 const fillOffsetY2 = (cellHeight2 - fillHeight2) / 2;
+const legendWidth2 = 110;
 
 // parses the dates
 function parseYearMonth2(dateString) {
@@ -67,7 +68,7 @@ function buildColorScale2(grid, field) {
 
 // creates the correctly sized svg
 function createSvg2(years) {
-  const width = margin2.left + margin2.right + years.length * cellWidth2;
+  const width = margin2.left + margin2.right + years.length * cellWidth2 + legendWidth2;
   const height = margin2.top + margin2.bottom + months2.length * cellHeight2;
 
   const svg = d3.select("#chart2")
@@ -156,6 +157,28 @@ function drawSparklines2(g, grid, x, y) {
   });
 }
 
+// draws a small color legend
+function drawLegend2(g, years) {
+  const legend = g.append("g")
+    .attr("transform", `translate(${years.length * cellWidth2 + 20},0)`);
+
+  legend.append("text")
+    .attr("x", 0).attr("y", 0)
+    .attr("font-weight", "bold")
+    .text("Legend (Celsius)");
+
+  [0, 10, 20, 30, 40].forEach((t, i) => {
+    legend.append("rect")
+      .attr("y", 20 + i * 20)
+      .attr("width", 14).attr("height", 14)
+      .attr("fill", d3.interpolateYlOrRd(t / 40));
+
+    legend.append("text")
+      .attr("x", 20).attr("y", 20 + i * 20 + 11)
+      .text(t);
+  });
+}
+
 // main function
 function render2(data) {
   const filtered = prepareData2(data);
@@ -171,6 +194,7 @@ function render2(data) {
   let field = "maxTemp";
   drawCells2(g, grid, x, y, buildColorScale2(grid, field), field, () => field);
   drawSparklines2(g, grid, x, y);
+  drawLegend2(g, years);
 
   d3.select("#toggle-btn2").on("click", () => {
     field = field === "maxTemp" ? "minTemp" : "maxTemp";
