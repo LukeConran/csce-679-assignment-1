@@ -5,13 +5,13 @@ const fillArea = 0.75;                                                          
 const fillSize = cellSize * Math.sqrt(fillArea);
 const fillOffset = (cellSize - fillSize) / 2;
 
-// parses a "YYYY-MM-DD" string into numeric year/month without timezone shifting
+// parses the dates
 function parseYearMonth(dateString) {
   const [year, month] = dateString.split("-").map(Number);
   return { year, month: month - 1 }; // month -> 0-11
 }
 
-// attaches numeric year, month, and max_temperature fields to each raw row
+// attaches variables to each row
 function prepareData(data) {
   data.forEach(d => {
     const { year, month } = parseYearMonth(d.date);
@@ -23,7 +23,7 @@ function prepareData(data) {
   return data;
 }
 
-// computes the overall max of max_temperature (and overall min of min_temperature) per (year, month)
+// computes the overall max of max_temperature and overall min of min_temperature
 function computeMonthlyExtremes(data) {
   const grouped = d3.rollup(
     data,
@@ -44,7 +44,7 @@ function computeMonthlyExtremes(data) {
   return grid;
 }
 
-// builds the x (year) and y (month index) scales
+// builds x and y scales
 function buildScales(years) {
   const x = d3.scaleBand().domain(years).range([0, years.length * cellSize]);
   const y = d3.scaleBand().domain(d3.range(12)).range([0, months.length * cellSize]);
@@ -52,7 +52,7 @@ function buildScales(years) {
   return { x, y, yMonths };
 }
 
-// builds a color scale for whichever field ("maxTemp" or "minTemp") is active
+// builds a color scale for whichever temperature field is active
 function buildColorScale(grid, field) {
   return d3.scaleSequential(d3.interpolateYlOrRd).domain(d3.extent(grid, d => d[field]));
 }

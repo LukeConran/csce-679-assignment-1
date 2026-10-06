@@ -1,8 +1,8 @@
 const months2 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; // Months of the year
-const margin2 = { top: 30, right: 20, bottom: 20, left: 50 };                             // Margins of the graph
-const startYear2 = 2008;                                                                  // Hardcoded year range for this chart
+const margin2 = { top: 30, right: 20, bottom: 20, left: 50 };                              // Margins of the graph
+const startYear2 = 2008;                                                                   // Hardcoded year range for this chart
 const endYear2 = 2017;
-const cellHeight2 = 70;                                                                   // Size of cells, good for changing whole grid size
+const cellHeight2 = 70;                                                                    // Size of cells, good for changing whole grid size
 const cellWidth2 = cellHeight2 * 1.5;                                                      // Cells are wider than tall (hardcoded 1.5x ratio)
 const fillArea2 = 0.75;                                                                    // Used for aesthetics assignment wants
 const fillWidth2 = cellWidth2 * Math.sqrt(fillArea2);
@@ -10,13 +10,13 @@ const fillHeight2 = cellHeight2 * Math.sqrt(fillArea2);
 const fillOffsetX2 = (cellWidth2 - fillWidth2) / 2;
 const fillOffsetY2 = (cellHeight2 - fillHeight2) / 2;
 
-// parses a "YYYY-MM-DD" string into numeric year/month without timezone shifting
+// parses the dates
 function parseYearMonth2(dateString) {
   const [year, month] = dateString.split("-").map(Number);
   return { year, month: month - 1 }; // month -> 0-11
 }
 
-// attaches numeric year, month, and max_temperature fields to each raw row, keeping only startYear2-endYear2
+// attaches variables to each row
 function prepareData2(data) {
   return data
     .map(d => {
@@ -30,13 +30,14 @@ function prepareData2(data) {
     .filter(d => d.year >= startYear2 && d.year <= endYear2);
 }
 
-// computes the overall max of max_temperature (and overall min of min_temperature) per (year, month)
+// computes the overall max of max_temperature and overall min of min_temperature
 function computeMonthlyExtremes2(data) {
   const grouped = d3.rollup(
     data,
     rows => ({
       maxTemp: d3.max(rows, d => d.max_temperature),
-      minTemp: d3.min(rows, d => d.min_temperature)
+      minTemp: d3.min(rows, d => d.min_temperature),
+      days: rows.slice().sort((a, b) => d3.ascending(a.date, b.date))
     }),
     d => d.year,
     d => d.month
@@ -44,14 +45,14 @@ function computeMonthlyExtremes2(data) {
 
   const grid = [];
   grouped.forEach((monthMap, year) => {
-    monthMap.forEach(({ maxTemp, minTemp }, month) => {
-      grid.push({ year, month, maxTemp, minTemp });
+    monthMap.forEach(({ maxTemp, minTemp, days }, month) => {
+      grid.push({ year, month, maxTemp, minTemp, days });
     });
   });
   return grid;
 }
 
-// builds the x (year) and y (month index) scales
+// builds x and y scales
 function buildScales2(years) {
   const x = d3.scaleBand().domain(years).range([0, years.length * cellWidth2]);
   const y = d3.scaleBand().domain(d3.range(12)).range([0, months2.length * cellHeight2]);
@@ -59,7 +60,7 @@ function buildScales2(years) {
   return { x, y, yMonths };
 }
 
-// builds a color scale for whichever field ("maxTemp" or "minTemp") is active
+// builds a color scale for whichever temperature field is active
 function buildColorScale2(grid, field) {
   return d3.scaleSequential(d3.interpolateYlOrRd).domain(d3.extent(grid, d => d[field]));
 }
@@ -117,6 +118,44 @@ function drawCells2(g, grid, x, y, color, field, getField) {
     });
 }
 
+// draws line plot for daily min_temperature and max_temperature across that month
+function drawSparklines2(g, grid, x, y) {
+  const sparkline = g.append("g")
+    .selectAll("g")
+    .data(grid)
+    .join("g")
+    .attr("transform", d => `translate(${x(d.year) + fillOffsetX2},${y(d.month) + fillOffsetY2})`);
+
+  sparkline.each(function (d) {
+    const cell = d3.select(this);
+    const days = d.days;
+
+    const xDay = d3.scaleLinear().domain([0, days.length - 1]).range([0, fillWidth2]);
+    const yTemp = d3.scaleLinear()
+      .domain(d3.extent(days.flatMap(r => [r.min_temperature, r.max_temperature])))
+      .range([fillHeight2 * 0.75, fillHeight2 * 0.25]);
+
+    const minLine = d3.line().x((r, i) => xDay(i)).y(r => yTemp(r.min_temperature));
+    const maxLine = d3.line().x((r, i) => xDay(i)).y(r => yTemp(r.max_temperature));
+
+    cell.append("path")
+      .datum(days)
+      .attr("class", "sparkline-min")
+      .attr("fill", "none")
+      .attr("stroke", "lightblue")
+      .attr("stroke-width", 1)
+      .attr("d", minLine);
+
+    cell.append("path")
+      .datum(days)
+      .attr("class", "sparkline-max")
+      .attr("fill", "none")
+      .attr("stroke", "darkgreen")
+      .attr("stroke-width", 1)
+      .attr("d", maxLine);
+  });
+}
+
 // main function
 function render2(data) {
   const filtered = prepareData2(data);
@@ -131,6 +170,7 @@ function render2(data) {
 
   let field = "maxTemp";
   drawCells2(g, grid, x, y, buildColorScale2(grid, field), field, () => field);
+  drawSparklines2(g, grid, x, y);
 
   d3.select("#toggle-btn2").on("click", () => {
     field = field === "maxTemp" ? "minTemp" : "maxTemp";
