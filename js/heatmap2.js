@@ -11,17 +11,11 @@ const fillOffsetX2 = (cellWidth2 - fillWidth2) / 2;
 const fillOffsetY2 = (cellHeight2 - fillHeight2) / 2;
 const legendWidth2 = 110;
 
-// parses the dates
-function parseYearMonth2(dateString) {
-  const [year, month] = dateString.split("-").map(Number);
-  return { year, month: month - 1 }; // month -> 0-11
-}
-
 // attaches variables to each row
 function prepareData2(data) {
   return data
     .map(d => {
-      const { year, month } = parseYearMonth2(d.date);
+      const { year, month } = parseYearMonth(d.date);
       d.year = year;
       d.month = month;
       d.max_temperature = +d.max_temperature;
@@ -59,11 +53,6 @@ function buildScales2(years) {
   const y = d3.scaleBand().domain(d3.range(12)).range([0, months2.length * cellHeight2]);
   const yMonths = d3.scaleBand().domain(months2).range([0, months2.length * cellHeight2]);
   return { x, y, yMonths };
-}
-
-// builds a color scale for whichever temperature field is active
-function buildColorScale2(grid, field) {
-  return d3.scaleSequential(d3.interpolateYlOrRd).domain(d3.extent(grid, d => d[field]));
 }
 
 // creates the correctly sized svg
@@ -157,28 +146,6 @@ function drawSparklines2(g, grid, x, y) {
   });
 }
 
-// draws a small color legend
-function drawLegend2(g, years) {
-  const legend = g.append("g")
-    .attr("transform", `translate(${years.length * cellWidth2 + 20},0)`);
-
-  legend.append("text")
-    .attr("x", 0).attr("y", 0)
-    .attr("font-weight", "bold")
-    .text("Legend (Celsius)");
-
-  [0, 10, 20, 30, 40].forEach((t, i) => {
-    legend.append("rect")
-      .attr("y", 20 + i * 20)
-      .attr("width", 14).attr("height", 14)
-      .attr("fill", d3.interpolateYlOrRd(t / 40));
-
-    legend.append("text")
-      .attr("x", 20).attr("y", 20 + i * 20 + 11)
-      .text(t);
-  });
-}
-
 // main function
 function render2(data) {
   const filtered = prepareData2(data);
@@ -192,15 +159,15 @@ function render2(data) {
   drawAxes2(g, x, yMonths);
 
   let field = "maxTemp";
-  drawCells2(g, grid, x, y, buildColorScale2(grid, field), field, () => field);
+  drawCells2(g, grid, x, y, buildColorScale(grid, field), field, () => field);
   drawSparklines2(g, grid, x, y);
-  drawLegend2(g, years);
+  drawLegend(g, years.length * cellWidth2 + 20);
 
   d3.select("#toggle-btn2").on("click", () => {
     field = field === "maxTemp" ? "minTemp" : "maxTemp";
     d3.select("#toggle-btn2").text(field === "maxTemp" ? "Show Min Temp" : "Show Max Temp");
     g.selectAll("rect.cell")
-      .attr("fill", d => buildColorScale2(grid, field)(d[field]));
+      .attr("fill", d => buildColorScale(grid, field)(d[field]));
   });
 }
 
