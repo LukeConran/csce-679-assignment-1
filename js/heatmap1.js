@@ -157,4 +157,4 @@ function render(data) {
 }
 
 //run
-d3.csv("temperature_daily.csv").then(render);
+d3.csv("data/temperature_daily.csv").then(render);

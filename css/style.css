@@ -1,0 +1,14 @@
+.cell { stroke: #fff; stroke-width: 1px; }
+text { font-family: sans-serif; font-size: 10px; }
+.axis .domain { stroke: #000; }
+.axis .tick line { stroke: #000; }
+#tooltip, #tooltip2 {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+  background: white;
+  color: black;
+  padding: 6px 8px;
+  font-family: sans-serif;
+  font-size: 12px;
+}
