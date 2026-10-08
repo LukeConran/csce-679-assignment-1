@@ -1,15 +1,11 @@
-const months2 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; // Months of the year
-const margin2 = { top: 30, right: 20, bottom: 20, left: 50 };                              // Margins of the graph
-const startYear2 = 2008;                                                                   // Hardcoded year range for this chart
+const startYear2 = 2008;                             // Hardcoded year range for this chart
 const endYear2 = 2017;
-const cellHeight2 = 70;                                                                    // Size of cells, good for changing whole grid size
-const cellWidth2 = cellHeight2 * 1.5;                                                      // Cells are wider than tall (hardcoded 1.5x ratio)
-const fillArea2 = 0.75;                                                                    // Used for aesthetics assignment wants
-const fillWidth2 = cellWidth2 * Math.sqrt(fillArea2);
-const fillHeight2 = cellHeight2 * Math.sqrt(fillArea2);
+const cellHeight2 = 70;                              // Size of cells, good for changing whole grid size
+const cellWidth2 = cellHeight2 * 1.5;                // Cells are wider than tall (hardcoded 1.5x ratio)
+const fillWidth2 = cellWidth2 * Math.sqrt(fillArea);
+const fillHeight2 = cellHeight2 * Math.sqrt(fillArea);
 const fillOffsetX2 = (cellWidth2 - fillWidth2) / 2;
 const fillOffsetY2 = (cellHeight2 - fillHeight2) / 2;
-const legendWidth2 = 110;
 
 // attaches variables to each row
 function prepareData2(data) {
@@ -50,22 +46,22 @@ function computeMonthlyExtremes2(data) {
 // builds x and y scales
 function buildScales2(years) {
   const x = d3.scaleBand().domain(years).range([0, years.length * cellWidth2]);
-  const y = d3.scaleBand().domain(d3.range(12)).range([0, months2.length * cellHeight2]);
-  const yMonths = d3.scaleBand().domain(months2).range([0, months2.length * cellHeight2]);
+  const y = d3.scaleBand().domain(d3.range(12)).range([0, months.length * cellHeight2]);
+  const yMonths = d3.scaleBand().domain(months).range([0, months.length * cellHeight2]);
   return { x, y, yMonths };
 }
 
 // creates the correctly sized svg
 function createSvg2(years) {
-  const width = margin2.left + margin2.right + years.length * cellWidth2 + legendWidth2;
-  const height = margin2.top + margin2.bottom + months2.length * cellHeight2;
+  const width = margin.left + margin.right + years.length * cellWidth2 + legendWidth;
+  const height = margin.top + margin.bottom + months.length * cellHeight2;
 
   const svg = d3.select("#chart2")
     .attr("width", width)
     .attr("height", height);
 
   return svg.append("g")
-    .attr("transform", `translate(${margin2.left},${margin2.top})`);
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 }
 
 // draws the axes accordingly
@@ -171,5 +167,3 @@ function render2(data) {
   });
 }
 
-//run
-d3.csv("data/temperature_daily.csv").then(render2);

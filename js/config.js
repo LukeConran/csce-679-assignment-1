@@ -1,3 +1,8 @@
+const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; // Months of the year
+const margin = { top: 30, right: 20, bottom: 20, left: 50 };                              // Margins of the graph
+const fillArea = 0.75;                                                                    // Used for aesthetics assignment wants
+const legendWidth = 110;
+
 // parses the dates
 function parseYearMonth(dateString) {
   const [year, month] = dateString.split("-").map(Number);

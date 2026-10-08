@@ -1,10 +1,6 @@
-const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; // Months of the year
-const margin = { top: 30, right: 20, bottom: 20, left: 50 };                              // Margins of the graph
-const cellSize = 50;                                                                      // Size of cells, good for changing whole grid size
-const fillArea = 0.75;                                                                    // Used for aesthetics assignment wants
+const cellSize = 50;                                 // Size of cells, good for changing whole grid size
 const fillSize = cellSize * Math.sqrt(fillArea);
 const fillOffset = (cellSize - fillSize) / 2;
-const legendWidth = 110;
 
 // attaches variables to each row
 function prepareData(data) {
@@ -103,5 +99,3 @@ function render(data) {
   });
 }
 
-//run
-d3.csv("data/temperature_daily.csv").then(render);
