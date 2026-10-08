@@ -35,46 +35,6 @@ function createSvg(years) {
     .attr("transform", `translate(${margin.left},${margin.top})`);
 }
 
-// draws the axes accordingly
-function drawAxes(g, x, yMonths) {
-  g.append("g")
-    .attr("class", "axis x-axis")
-    .call(d3.axisTop(x));
-
-  g.append("g")
-    .attr("class", "axis y-axis")
-    .call(d3.axisLeft(yMonths));
-}
-
-// draws the cells with their colors and sizing and also adds hover tooltip
-function drawCells(g, grid, x, y, color, field, getField) {
-  const tooltip = d3.select("#tooltip");
-
-  g.append("g")
-    .selectAll("rect")
-    .data(grid)
-    .join("rect")
-    .attr("class", "cell")
-    .attr("x", d => x(d.year) + fillOffset)
-    .attr("y", d => y(d.month) + fillOffset)
-    .attr("width", fillSize)
-    .attr("height", fillSize)
-    .attr("fill", d => color(d[field]))
-    
-    .on("mouseover", (event, d) => {
-      tooltip.style("display", "block");
-    })
-    .on("mousemove", (event, d) => {
-      tooltip
-        .html(`Date: ${d.year}-${d.month + 1}; max: ${d.maxTemp.toFixed(1)} min: ${d.minTemp.toFixed(1)}`)
-        .style("left", `${event.pageX + 12}px`)
-        .style("top", `${event.pageY + 12}px`);
-    })
-    .on("mouseout", () => {
-      tooltip.style("display", "none");
-    });
-}
-
 // main function
 function render(data) {
   prepareData(data);
@@ -88,7 +48,7 @@ function render(data) {
   drawAxes(g, x, yMonths);
 
   let field = "maxTemp";
-  drawCells(g, grid, x, y, buildColorScale(grid, field), field, () => field);
+  drawCells(g, grid, x, y, buildColorScale(grid, field), field, fillSize, fillSize, fillOffset, fillOffset, "#tooltip");
   drawLegend(g, years.length * cellSize + 20);
 
   d3.select("#toggle-btn").on("click", () => {

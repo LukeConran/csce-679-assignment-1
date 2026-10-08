@@ -35,6 +35,46 @@ function buildColorScale(grid, field) {
   return d3.scaleSequential(d3.interpolateYlOrRd).domain(d3.extent(grid, d => d[field]));
 }
 
+// draws the axes accordingly
+function drawAxes(g, x, yMonths) {
+  g.append("g")
+    .attr("class", "axis x-axis")
+    .call(d3.axisTop(x));
+
+  g.append("g")
+    .attr("class", "axis y-axis")
+    .call(d3.axisLeft(yMonths));
+}
+
+// draws the cells with their colors and sizing and also adds hover tooltip
+function drawCells(g, grid, x, y, color, field, fillWidth, fillHeight, fillOffsetX, fillOffsetY, tooltipSelector) {
+  const tooltip = d3.select(tooltipSelector);
+
+  g.append("g")
+    .selectAll("rect")
+    .data(grid)
+    .join("rect")
+    .attr("class", "cell")
+    .attr("x", d => x(d.year) + fillOffsetX)
+    .attr("y", d => y(d.month) + fillOffsetY)
+    .attr("width", fillWidth)
+    .attr("height", fillHeight)
+    .attr("fill", d => color(d[field]))
+
+    .on("mouseover", (event, d) => {
+      tooltip.style("display", "block");
+    })
+    .on("mousemove", (event, d) => {
+      tooltip
+        .html(`Date: ${d.year}-${d.month + 1}; max: ${d.maxTemp.toFixed(1)} min: ${d.minTemp.toFixed(1)}`)
+        .style("left", `${event.pageX + 12}px`)
+        .style("top", `${event.pageY + 12}px`);
+    })
+    .on("mouseout", () => {
+      tooltip.style("display", "none");
+    });
+}
+
 // draws a small color legend
 function drawLegend(g, x0) {
   const legend = g.append("g")

@@ -64,46 +64,6 @@ function createSvg2(years) {
     .attr("transform", `translate(${margin.left},${margin.top})`);
 }
 
-// draws the axes accordingly
-function drawAxes2(g, x, yMonths) {
-  g.append("g")
-    .attr("class", "axis x-axis")
-    .call(d3.axisTop(x));
-
-  g.append("g")
-    .attr("class", "axis y-axis")
-    .call(d3.axisLeft(yMonths));
-}
-
-// draws the cells with their colors and sizing and also adds hover tooltip
-function drawCells2(g, grid, x, y, color, field, getField) {
-  const tooltip = d3.select("#tooltip2");
-
-  g.append("g")
-    .selectAll("rect")
-    .data(grid)
-    .join("rect")
-    .attr("class", "cell")
-    .attr("x", d => x(d.year) + fillOffsetX2)
-    .attr("y", d => y(d.month) + fillOffsetY2)
-    .attr("width", fillWidth2)
-    .attr("height", fillHeight2)
-    .attr("fill", d => color(d[field]))
-
-    .on("mouseover", (event, d) => {
-      tooltip.style("display", "block");
-    })
-    .on("mousemove", (event, d) => {
-      tooltip
-        .html(`Date: ${d.year}-${d.month + 1}; max: ${d.maxTemp.toFixed(1)} min: ${d.minTemp.toFixed(1)}`)
-        .style("left", `${event.pageX + 12}px`)
-        .style("top", `${event.pageY + 12}px`);
-    })
-    .on("mouseout", () => {
-      tooltip.style("display", "none");
-    });
-}
-
 // draws line plot for daily min_temperature and max_temperature across that month
 function drawSparklines2(g, grid, x, y) {
   const sparkline = g.append("g")
@@ -152,10 +112,10 @@ function render2(data) {
   const { x, y, yMonths } = buildScales2(years);
   const g = createSvg2(years);
 
-  drawAxes2(g, x, yMonths);
+  drawAxes(g, x, yMonths);
 
   let field = "maxTemp";
-  drawCells2(g, grid, x, y, buildColorScale(grid, field), field, () => field);
+  drawCells(g, grid, x, y, buildColorScale(grid, field), field, fillWidth2, fillHeight2, fillOffsetX2, fillOffsetY2, "#tooltip2");
   drawSparklines2(g, grid, x, y);
   drawLegend(g, years.length * cellWidth2 + 20);
 
